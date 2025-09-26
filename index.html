@@ -9,26 +9,38 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
+            background-color: #e2f7e2;
+            color: #2d3748;
         }
         .container {
             background-color: #ffffff;
             border-radius: 1.5rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
         .text-gradient {
-            background: linear-gradient(90deg, #60a5fa, #3b82f6);
+            background: linear-gradient(45deg, #48bb78, #38a169);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+        }
+        .card {
+            border-radius: 1rem;
+            background-color: #fff;
+            border: 1px solid #9ae6b4;
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4 sm:p-6 lg:p-8">
     <div class="container max-w-4xl w-full mx-auto p-6 sm:p-10 text-center">
         <!-- Profile Section -->
-        <div class="flex flex-col items-center mb-8">
-            <div class="relative w-32 h-32 sm:w-40 sm:h-40 mb-4 rounded-full overflow-hidden border-4 border-blue-400">
-                <img src="https://placehold.co/160x160/a5b4fc/4338ca?text=AJ" alt="Profile Picture" class="w-full h-full object-cover">
+        <div class="flex flex-col items-center mb-10">
+            <div class="relative w-32 h-32 sm:w-40 sm:h-40 mb-4 rounded-full overflow-hidden border-4 border-green-400 shadow-lg">
+                <img src="https://placehold.co/160x160/48bb78/fff?text=AJ" alt="Profile Picture" class="w-full h-full object-cover">
             </div>
             <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-900 mb-2">
                 <span class="text-gradient">Anna Elizabeth Joby</span>
@@ -37,28 +49,52 @@
         </div>
 
         <!-- About Me Section -->
-        <div class="space-y-6">
-            <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 border-b-2 border-blue-400 pb-2 mb-4">
+        <div class="mb-10">
+            <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 border-b-2 border-green-400 pb-2 mb-4">
                 About Me
             </h2>
             <p class="text-gray-700 leading-relaxed text-base sm:text-lg">
                 I am a passionate and dedicated Computer Science student currently pursuing my B.Tech at 
-                <span class="font-semibold text-blue-600">Vidya Academy of Science and Technology</span>. 
-                Hailing from <span class="font-semibold text-blue-600">Thrissur, Kerala</span>, I am eager to apply my skills and knowledge to real-world challenges. 
+                <span class="font-semibold text-green-600">Vidya Academy of Science and Technology</span>. 
+                Hailing from <span class="font-semibold text-green-600">Thrissur, Kerala</span>, I am eager to apply my skills and knowledge to real-world challenges. 
                 This portfolio serves as a showcase of my projects and accomplishments.
             </p>
         </div>
 
+        <!-- Projects Section -->
+        <div class="mb-10">
+            <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 border-b-2 border-green-400 pb-2 mb-6">
+                Projects
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Project 1 -->
+                <div class="card p-6 text-left">
+                    <h3 class="text-xl font-bold text-green-600 mb-2">Project Title 1</h3>
+                    <p class="text-gray-600 mb-4">
+                        A brief description of your project goes here. Mention the technologies used (e.g., Python, JavaScript, etc.) and what it accomplishes.
+                    </p>
+                    <a href="#" class="text-green-500 hover:underline font-medium">View Project →</a>
+                </div>
+                <!-- Project 2 -->
+                <div class="card p-6 text-left">
+                    <h3 class="text-xl font-bold text-green-600 mb-2">Project Title 2</h3>
+                    <p class="text-gray-600 mb-4">
+                        Another brief description of a different project. Talk about your role and the impact of the project.
+                    </p>
+                    <a href="#" class="text-green-500 hover:underline font-medium">View Project →</a>
+                </div>
+            </div>
+        </div>
+        
         <!-- Contact Section -->
-        <div class="mt-8">
-            <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 border-b-2 border-blue-400 pb-2 mb-4">
+        <div>
+            <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 border-b-2 border-green-400 pb-2 mb-4">
                 Get in Touch
             </h2>
             <p class="text-gray-700 leading-relaxed text-base sm:text-lg">
-                Let's connect and build something amazing together!
+                You can reach me at your-email@example.com or find me on social media.
             </p>
         </div>
-        
     </div>
 </body>
 </html>
