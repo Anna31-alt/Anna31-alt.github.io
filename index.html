@@ -2,237 +2,112 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Student Management & Grading System</title>
+    <title>Student Management System Login</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f9; }
-        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        h1 { text-align: center; color: #333; }
-        .form-section, .list-section { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 6px; }
-        .form-section h2, .list-section h2 { margin-top: 0; border-bottom: 2px solid #eee; padding-bottom: 5px; color: #007bff; }
-        label { display: block; margin-top: 10px; font-weight: bold; }
-        input[type="text"], input[type="number"] { width: calc(100% - 22px); padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; }
-        button { padding: 10px 15px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px; margin-right: 5px; }
-        button:hover { background-color: #218838; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        .grade-f { color: red; font-weight: bold; }
-        .grade-a { color: green; font-weight: bold; }
+        /* Basic CSS Styling for the Login Form */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .login-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            width: 300px;
+            text-align: center;
+        }
+
+        h2 {
+            margin-bottom: 25px;
+            color: #333;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .input-group input[type="text"],
+        .input-group input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box; /* Important for padding to stay inside width */
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>📝 Student Management & Grading System</h1>
-    <p>*(Data is stored temporarily in your browser using JavaScript OOP)*</p>
+<div class="login-container">
+    <h2>Student System Login 🔒</h2>
+    <form id="loginForm" action="/login" method="POST"> 
+        
+        <div class="input-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" required>
+        </div>
 
-    <div class="form-section">
-        <h2>🧑‍🎓 Add/Update Student</h2>
-        <label for="sName">Name:</label>
-        <input type="text" id="sName" placeholder="Enter student name">
-        <label for="sAge">Age:</label>
-        <input type="number" id="sAge" placeholder="Enter age">
-        <label for="sID">ID (for lookup/update):</label>
-        <input type="text" id="sID" placeholder="Enter unique ID (e.g., S1001)">
-        <button onclick="addStudent()">Add Student</button>
-        <button onclick="deleteStudent()">Delete Student</button>
-    </div>
+        <div class="input-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
+        </div>
 
-    <div class="form-section">
-        <h2>📈 Add Test Score</h2>
-        <label for="gID">Student ID:</label>
-        <input type="text" id="gID" placeholder="Enter student ID to add grade">
-        <label for="gTest">Test Name:</label>
-        <input type="text" id="gTest" placeholder="e.g., Midterm, Project">
-        <label for="gScore">Score (0-100):</label>
-        <input type="number" id="gScore" placeholder="Enter score">
-        <button onclick="addGrade()">Add Score</button>
-    </div>
-
-    <div class="list-section">
-        <h2>📊 Student List</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Age</th>
-                    <th>Average</th>
-                    <th>Letter Grade</th>
-                    <th>Grades</th>
-                </tr>
-            </thead>
-            <tbody id="studentTableBody">
-                </tbody>
-        </table>
-    </div>
+        <button type="submit">Log In</button>
+    </form>
+    
+    <p id="message" style="color: red; margin-top: 15px;"></p>
 </div>
 
 <script>
-    // ------------------------------------
-    // JAVASCRIPT OOP IMPLEMENTATION
-    // ------------------------------------
-
-    // 1. Grade Class (Aggregated Object)
-    class Grade {
-        constructor(testName, score) {
-            this.testName = testName;
-            this.score = parseFloat(score);
-        }
-    }
-
-    // 2. Student Class (Core Entity)
-    // Demonstrates Aggregation: Student HAS-A list of Grades
-    class Student {
-        constructor(name, age, id) {
-            this.name = name;
-            this.age = parseInt(age);
-            this.studentID = id;
-            this.grades = []; // AGGREGATION
-        }
-
-        addGrade(testName, score) {
-            this.grades.push(new Grade(testName, score));
-        }
-
-        calculateAverage() {
-            if (this.grades.length === 0) return 0;
-            const sum = this.grades.reduce((total, grade) => total + grade.score, 0);
-            return sum / this.grades.length;
-        }
-
-        getLetterGrade() {
-            const avg = this.calculateAverage();
-            if (avg >= 90) return 'A';
-            if (avg >= 80) return 'B';
-            if (avg >= 70) return 'C';
-            if (avg >= 60) return 'D';
-            return 'F';
-        }
+    document.getElementById('loginForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Stop the form from submitting normally
         
-        getGradeDetails() {
-            return this.grades.map(g => `${g.testName}: ${g.score}`).join(' | ');
-        }
-    }
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const message = document.getElementById('message');
 
-    // Student Database (Map for quick lookup by ID)
-    const studentDatabase = new Map();
-
-    // ------------------------------------
-    // CORE APPLICATION LOGIC
-    // ------------------------------------
-
-    function addStudent() {
-        const id = document.getElementById('sID').value.trim();
-        const name = document.getElementById('sName').value.trim();
-        const age = document.getElementById('sAge').value;
-
-        if (!id || !name || !age) {
-            alert("Please fill in all student fields.");
-            return;
-        }
-        
-        // Add new student (or update existing one)
-        if (studentDatabase.has(id)) {
-            const student = studentDatabase.get(id);
-            student.name = name;
-            student.age = parseInt(age);
-            alert(`Student ID ${id} updated successfully.`);
+        // This is where you would send data to a Java backend via AJAX or a direct form post.
+        // For this static demo, we'll just check a hardcoded value:
+        if (username === 'admin' && password === '1234') {
+             message.textContent = 'Login successful! Redirecting...';
+             message.style.color = 'green';
+             // In a real app, you'd redirect here: window.location.href = 'student_dashboard.html';
         } else {
-            const newStudent = new Student(name, age, id);
-            studentDatabase.set(id, newStudent);
-            alert(`Student ${name} added successfully.`);
+             message.textContent = 'Invalid username or password.';
+             message.style.color = 'red';
         }
-
-        document.getElementById('sName').value = '';
-        document.getElementById('sAge').value = '';
-        document.getElementById('sID').value = '';
-        renderStudents();
-    }
-
-    function deleteStudent() {
-        const id = document.getElementById('sID').value.trim();
-        if (!id) {
-            alert("Please enter the Student ID to delete.");
-            return;
-        }
-
-        if (studentDatabase.delete(id)) {
-            alert(`Student ID ${id} deleted successfully.`);
-        } else {
-            alert(`Error: Student ID ${id} not found.`);
-        }
-        renderStudents();
-    }
-
-    function addGrade() {
-        const id = document.getElementById('gID').value.trim();
-        const testName = document.getElementById('gTest').value.trim();
-        const score = document.getElementById('gScore').value;
-
-        if (!id || !testName || score === '') {
-            alert("Please fill in all grade fields.");
-            return;
-        }
-
-        const student = studentDatabase.get(id);
-        if (!student) {
-            alert(`Error: Student ID ${id} not found.`);
-            return;
-        }
-
-        student.addGrade(testName, score);
-        alert(`Score added for ${student.name}.`);
-
-        document.getElementById('gID').value = '';
-        document.getElementById('gTest').value = '';
-        document.getElementById('gScore').value = '';
-        renderStudents();
-    }
-
-    function renderStudents() {
-        const tbody = document.getElementById('studentTableBody');
-        tbody.innerHTML = ''; // Clear existing list
-
-        studentDatabase.forEach(student => {
-            const avg = student.calculateAverage().toFixed(2);
-            const letter = student.getLetterGrade();
-            const row = tbody.insertRow();
-            
-            // Apply a class for F grades for styling
-            const gradeClass = (letter === 'F') ? 'grade-f' : (letter === 'A' ? 'grade-a' : '');
-
-            row.insertCell().textContent = student.studentID;
-            row.insertCell().textContent = student.name;
-            row.insertCell().textContent = student.age;
-            row.insertCell().textContent = avg;
-            
-            const gradeCell = row.insertCell();
-            gradeCell.textContent = letter;
-            gradeCell.className = gradeClass;
-            
-            row.insertCell().textContent = student.getGradeDetails();
-        });
-    }
-
-    // Initialize with sample data on load
-    function initializeData() {
-        const s1 = new Student("Alice Johnson", 20, "S1001");
-        s1.addGrade("Midterm", 85.5);
-        s1.addGrade("Final", 92.0);
-        studentDatabase.set(s1.studentID, s1);
-
-        const s2 = new Student("Bob Smith", 21, "S1002");
-        s2.addGrade("Quiz", 65.0);
-        s2.addGrade("Project", 70.0);
-        studentDatabase.set(s2.studentID, s2);
-        
-        renderStudents();
-    }
-
-    // Run initialization when the script loads
-    initializeData();
-
+    });
 </script>
 
 </body>
