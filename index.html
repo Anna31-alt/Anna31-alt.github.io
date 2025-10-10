@@ -2,15 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Student Management & Grading System</title>
+    <title>Secured Student Management & Grading System</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f9; }
-        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        /* --- General Styles --- */
+        body { font-family: Arial, sans-serif; margin: 0; background-color: #f4f4f9; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding-top: 20px; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); width: 100%; margin-bottom: 20px; }
         h1 { text-align: center; color: #333; }
+        
+        /* --- Form/List Section Styles (for Management System) --- */
         .form-section, .list-section { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 6px; }
         .form-section h2, .list-section h2 { margin-top: 0; border-bottom: 2px solid #eee; padding-bottom: 5px; color: #007bff; }
         label { display: block; margin-top: 10px; font-weight: bold; }
-        input[type="text"], input[type="number"] { width: calc(100% - 22px); padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; }
+        input[type="text"], input[type="number"], input[type="password"] { width: calc(100% - 22px); padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; }
         button { padding: 10px 15px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px; margin-right: 5px; }
         button:hover { background-color: #218838; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
@@ -18,23 +21,55 @@
         th { background-color: #f2f2f2; }
         .grade-f { color: red; font-weight: bold; }
         .grade-a { color: green; font-weight: bold; }
+
+        /* --- Login Specific Styles --- */
+        #login-container {
+            width: 350px;
+            padding: 30px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        #login-btn { background-color: #007bff; }
+        #login-btn:hover { background-color: #0056b3; }
+        #logout-btn { background-color: #dc3545; }
+        #logout-btn:hover { background-color: #c82333; }
     </style>
 </head>
 <body>
 
-<div class="container">
+<div id="login-container">
+    <h2>Student System Login 🔒</h2>
+    <div class="input-group">
+        <label for="username">Username (Hint: admin)</label>
+        <input type="text" id="username" name="username" required>
+    </div>
+    <div class="input-group">
+        <label for="password">Password (Hint: 1234)</label>
+        <input type="password" id="password" name="password" required>
+    </div>
+    <button id="login-btn" onclick="handleLogin()">Log In</button>
+    <p id="login-message" style="margin-top: 15px;"></p>
+</div>
+
+<div class="container" id="management-system" style="display: none;">
     <h1>📝 Student Management & Grading System</h1>
     <p>*(Data is stored temporarily in your browser using JavaScript OOP)*</p>
+    <button id="logout-btn" onclick="handleLogout()">Logout</button>
+    
+    <hr>
 
     <div class="form-section">
-        <h2>🧑‍🎓 Add/Update Student</h2>
+        <h2>🧑‍🎓 Add/Update Student (CRUD)</h2>
         <label for="sName">Name:</label>
         <input type="text" id="sName" placeholder="Enter student name">
         <label for="sAge">Age:</label>
         <input type="number" id="sAge" placeholder="Enter age">
         <label for="sID">ID (for lookup/update):</label>
         <input type="text" id="sID" placeholder="Enter unique ID (e.g., S1001)">
-        <button onclick="addStudent()">Add Student</button>
+        <button onclick="addStudent()">Add/Update Student</button>
         <button onclick="deleteStudent()">Delete Student</button>
     </div>
 
@@ -69,11 +104,52 @@
 </div>
 
 <script>
+    // Hardcoded credentials for the frontend demo
+    const VALID_USERNAME = 'admin';
+    const VALID_PASSWORD = '1234';
+
     // ------------------------------------
-    // JAVASCRIPT OOP IMPLEMENTATION
+    // LOGIN/LOGOUT LOGIC
     // ------------------------------------
 
-    // 1. Grade Class (Aggregated Object)
+    function handleLogin() {
+        const user = document.getElementById('username').value.trim();
+        const pass = document.getElementById('password').value.trim();
+        const message = document.getElementById('login-message');
+        
+        // Check hardcoded credentials
+        if (user === VALID_USERNAME && pass === VALID_PASSWORD) {
+            message.textContent = 'Login successful!';
+            message.style.color = 'green';
+            
+            // Hide login and show management system
+            document.getElementById('login-container').style.display = 'none';
+            document.getElementById('management-system').style.display = 'block';
+            
+            // Initialize data and render the student list
+            initializeData();
+        } else {
+            message.textContent = 'Invalid username or password.';
+            message.style.color = 'red';
+        }
+    }
+
+    function handleLogout() {
+        // Clear inputs (optional)
+        document.getElementById('username').value = '';
+        document.getElementById('password').value = '';
+        document.getElementById('login-message').textContent = '';
+        
+        // Hide management system and show login
+        document.getElementById('management-system').style.display = 'none';
+        document.getElementById('login-container').style.display = 'block';
+    }
+
+
+    // ------------------------------------
+    // JAVASCRIPT OOP IMPLEMENTATION (from previous example)
+    // ------------------------------------
+
     class Grade {
         constructor(testName, score) {
             this.testName = testName;
@@ -81,14 +157,12 @@
         }
     }
 
-    // 2. Student Class (Core Entity)
-    // Demonstrates Aggregation: Student HAS-A list of Grades
     class Student {
         constructor(name, age, id) {
             this.name = name;
             this.age = parseInt(age);
             this.studentID = id;
-            this.grades = []; // AGGREGATION
+            this.grades = [];
         }
 
         addGrade(testName, score) {
@@ -115,11 +189,10 @@
         }
     }
 
-    // Student Database (Map for quick lookup by ID)
     const studentDatabase = new Map();
 
     // ------------------------------------
-    // CORE APPLICATION LOGIC
+    // CORE APPLICATION LOGIC (CRUD)
     // ------------------------------------
 
     function addStudent() {
@@ -132,7 +205,6 @@
             return;
         }
         
-        // Add new student (or update existing one)
         if (studentDatabase.has(id)) {
             const student = studentDatabase.get(id);
             student.name = name;
@@ -192,14 +264,13 @@
 
     function renderStudents() {
         const tbody = document.getElementById('studentTableBody');
-        tbody.innerHTML = ''; // Clear existing list
+        tbody.innerHTML = '';
 
         studentDatabase.forEach(student => {
             const avg = student.calculateAverage().toFixed(2);
             const letter = student.getLetterGrade();
             const row = tbody.insertRow();
             
-            // Apply a class for F grades for styling
             const gradeClass = (letter === 'F') ? 'grade-f' : (letter === 'A' ? 'grade-a' : '');
 
             row.insertCell().textContent = student.studentID;
@@ -215,8 +286,9 @@
         });
     }
 
-    // Initialize with sample data on load
     function initializeData() {
+        // Clear previous data if any, then add samples
+        studentDatabase.clear();
         const s1 = new Student("Alice Johnson", 20, "S1001");
         s1.addGrade("Midterm", 85.5);
         s1.addGrade("Final", 92.0);
@@ -229,9 +301,6 @@
         
         renderStudents();
     }
-
-    // Run initialization when the script loads
-    initializeData();
 
 </script>
 
