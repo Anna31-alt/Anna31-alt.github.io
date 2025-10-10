@@ -1,251 +1,239 @@
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.stream.Collectors;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Management & Grading System</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f9; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #333; }
+        .form-section, .list-section { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 6px; }
+        .form-section h2, .list-section h2 { margin-top: 0; border-bottom: 2px solid #eee; padding-bottom: 5px; color: #007bff; }
+        label { display: block; margin-top: 10px; font-weight: bold; }
+        input[type="text"], input[type="number"] { width: calc(100% - 22px); padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 10px 15px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px; margin-right: 5px; }
+        button:hover { background-color: #218838; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .grade-f { color: red; font-weight: bold; }
+        .grade-a { color: green; font-weight: bold; }
+    </style>
+</head>
+<body>
 
-// ------------------------------------
-// 1. Grade Class (Aggregated Object)
-// ------------------------------------
-class Grade {
-    private String testName;
-    private double score; // e.g., 0.0 to 100.0
+<div class="container">
+    <h1>📝 Student Management & Grading System</h1>
+    <p>*(Data is stored temporarily in your browser using JavaScript OOP)*</p>
 
-    public Grade(String testName, double score) {
-        this.testName = testName;
-        this.score = score;
-    }
+    <div class="form-section">
+        <h2>🧑‍🎓 Add/Update Student</h2>
+        <label for="sName">Name:</label>
+        <input type="text" id="sName" placeholder="Enter student name">
+        <label for="sAge">Age:</label>
+        <input type="number" id="sAge" placeholder="Enter age">
+        <label for="sID">ID (for lookup/update):</label>
+        <input type="text" id="sID" placeholder="Enter unique ID (e.g., S1001)">
+        <button onclick="addStudent()">Add Student</button>
+        <button onclick="deleteStudent()">Delete Student</button>
+    </div>
 
-    public double getScore() {
-        return score;
-    }
-    public String getTestName() {
-        return testName;
-    }
-}
+    <div class="form-section">
+        <h2>📈 Add Test Score</h2>
+        <label for="gID">Student ID:</label>
+        <input type="text" id="gID" placeholder="Enter student ID to add grade">
+        <label for="gTest">Test Name:</label>
+        <input type="text" id="gTest" placeholder="e.g., Midterm, Project">
+        <label for="gScore">Score (0-100):</label>
+        <input type="number" id="gScore" placeholder="Enter score">
+        <button onclick="addGrade()">Add Score</button>
+    </div>
 
-// ------------------------------------
-// 2. Student Class (Core Entity)
-// ------------------------------------
-class Student {
-    private String name;
-    private int age;
-    private String studentID;
-    // AGGREGATION: Student HAS-A List of Grades
-    private List<Grade> grades; 
+    <div class="list-section">
+        <h2>📊 Student List</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th>Average</th>
+                    <th>Letter Grade</th>
+                    <th>Grades</th>
+                </tr>
+            </thead>
+            <tbody id="studentTableBody">
+                </tbody>
+        </table>
+    </div>
+</div>
 
-    public Student(String name, int age, String studentID) {
-        this.name = name;
-        this.age = age;
-        this.studentID = studentID;
-        this.grades = new ArrayList<>();
-    }
+<script>
+    // ------------------------------------
+    // JAVASCRIPT OOP IMPLEMENTATION
+    // ------------------------------------
 
-    // Method to add a grade/test score
-    public void addGrade(String testName, double score) {
-        this.grades.add(new Grade(testName, score));
-    }
-
-    // Method to calculate the average grade
-    public double calculateAverage() {
-        if (grades.isEmpty()) {
-            return 0.0;
-        }
-        double sum = 0;
-        for (Grade grade : grades) {
-            sum += grade.getScore();
-        }
-        return sum / grades.size();
-    }
-
-    // Method to assign a letter grade
-    public String getLetterGrade() {
-        double avg = calculateAverage();
-        if (avg >= 90) return "A";
-        if (avg >= 80) return "B";
-        if (avg >= 70) return "C";
-        if (avg >= 60) return "D";
-        return "F";
-    }
-
-    // Getters for student information (used for display and lookup)
-    public String getStudentID() {
-        return studentID;
-    }
-    public String getName() {
-        return name;
-    }
-    public int getAge() {
-        return age;
-    }
-    public List<Grade> getGrades() {
-        return grades;
-    }
-
-    // Overriding toString for easy viewing
-    @Override
-    public String toString() {
-        return String.format("ID: %s | Name: %s | Age: %d | Avg Score: %.2f | Letter Grade: %s",
-                             studentID, name, age, calculateAverage(), getLetterGrade());
-    }
-}
-
-// ------------------------------------
-// 3. Main Management Class
-// ------------------------------------
-public class StudentManagementSystem {
-    // Stores students using a HashMap for efficient ID lookup
-    private Map<String, Student> studentDatabase; 
-    private Scanner scanner;
-
-    public StudentManagementSystem() {
-        this.studentDatabase = new HashMap<>();
-        this.scanner = new Scanner(System.in);
-        // Initialize with sample data
-        initializeData();
-    }
-
-    private void initializeData() {
-        Student s1 = new Student("Alice Johnson", 20, "S1001");
-        s1.addGrade("Midterm", 85.5);
-        s1.addGrade("Final", 92.0);
-        studentDatabase.put(s1.getStudentID(), s1);
-
-        Student s2 = new Student("Bob Smith", 21, "S1002");
-        s2.addGrade("Quiz", 65.0);
-        s2.addGrade("Project", 78.5);
-        studentDatabase.put(s2.getStudentID(), s2);
-        System.out.println("System initialized with two sample students.");
-    }
-
-    // --- CRUD Operations ---
-
-    // 1. Add Student (Create)
-    public void addStudent() {
-        System.out.println("\n--- Add New Student ---");
-        System.out.print("Enter Student ID: ");
-        String id = scanner.nextLine();
-        if (studentDatabase.containsKey(id)) {
-            System.out.println("❌ Error: Student ID already exists. Try again.");
-            return;
-        }
-
-        System.out.print("Enter Name: ");
-        String name = scanner.nextLine();
-        int age = -1;
-        try {
-            System.out.print("Enter Age: ");
-            age = Integer.parseInt(scanner.nextLine());
-        } catch (NumberFormatException e) {
-            System.out.println("❌ Invalid age entered. Returning to menu.");
-            return;
-        }
-
-        Student newStudent = new Student(name, age, id);
-        studentDatabase.put(id, newStudent);
-        System.out.println("✅ Student " + name + " added successfully.");
-    }
-
-    // 2. View All Students (Read)
-    public void viewAllStudents() {
-        System.out.println("\n--- All Students in System (" + studentDatabase.size() + ") ---");
-        if (studentDatabase.isEmpty()) {
-            System.out.println("No students currently in the system.");
-            return;
-        }
-        for (Student s : studentDatabase.values()) {
-            System.out.println(s);
-            // Format grades for display
-            String gradeDetails = s.getGrades().stream()
-                                   .map(g -> g.getTestName() + ": " + String.format("%.1f", g.getScore()))
-                                   .collect(Collectors.joining(" | "));
-            System.out.println("  📝 Grades: " + (gradeDetails.isEmpty() ? "No grades recorded." : gradeDetails));
+    // 1. Grade Class (Aggregated Object)
+    class Grade {
+        constructor(testName, score) {
+            this.testName = testName;
+            this.score = parseFloat(score);
         }
     }
 
-    // 3. Update/Add Grades (Update)
-    public void updateStudentGrades() {
-        System.out.println("\n--- Update Student Grades ---");
-        System.out.print("Enter Student ID to update grades for: ");
-        String id = scanner.nextLine();
-        Student student = studentDatabase.get(id);
+    // 2. Student Class (Core Entity)
+    // Demonstrates Aggregation: Student HAS-A list of Grades
+    class Student {
+        constructor(name, age, id) {
+            this.name = name;
+            this.age = parseInt(age);
+            this.studentID = id;
+            this.grades = []; // AGGREGATION
+        }
 
-        if (student == null) {
-            System.out.println("❌ Error: Student not found with ID " + id);
+        addGrade(testName, score) {
+            this.grades.push(new Grade(testName, score));
+        }
+
+        calculateAverage() {
+            if (this.grades.length === 0) return 0;
+            const sum = this.grades.reduce((total, grade) => total + grade.score, 0);
+            return sum / this.grades.length;
+        }
+
+        getLetterGrade() {
+            const avg = this.calculateAverage();
+            if (avg >= 90) return 'A';
+            if (avg >= 80) return 'B';
+            if (avg >= 70) return 'C';
+            if (avg >= 60) return 'D';
+            return 'F';
+        }
+        
+        getGradeDetails() {
+            return this.grades.map(g => `${g.testName}: ${g.score}`).join(' | ');
+        }
+    }
+
+    // Student Database (Map for quick lookup by ID)
+    const studentDatabase = new Map();
+
+    // ------------------------------------
+    // CORE APPLICATION LOGIC
+    // ------------------------------------
+
+    function addStudent() {
+        const id = document.getElementById('sID').value.trim();
+        const name = document.getElementById('sName').value.trim();
+        const age = document.getElementById('sAge').value;
+
+        if (!id || !name || !age) {
+            alert("Please fill in all student fields.");
             return;
         }
         
-        System.out.println("Current student: " + student.getName());
-        System.out.print("Enter Test Name (e.g., 'Quiz 1', 'Final Exam'): ");
-        String testName = scanner.nextLine();
-        
-        double score = -1;
-        try {
-            System.out.print("Enter Score (0-100): ");
-            score = Double.parseDouble(scanner.nextLine());
-        } catch (NumberFormatException e) {
-            System.out.println("❌ Invalid score entered. Returning to menu.");
+        // Add new student (or update existing one)
+        if (studentDatabase.has(id)) {
+            const student = studentDatabase.get(id);
+            student.name = name;
+            student.age = parseInt(age);
+            alert(`Student ID ${id} updated successfully.`);
+        } else {
+            const newStudent = new Student(name, age, id);
+            studentDatabase.set(id, newStudent);
+            alert(`Student ${name} added successfully.`);
+        }
+
+        document.getElementById('sName').value = '';
+        document.getElementById('sAge').value = '';
+        document.getElementById('sID').value = '';
+        renderStudents();
+    }
+
+    function deleteStudent() {
+        const id = document.getElementById('sID').value.trim();
+        if (!id) {
+            alert("Please enter the Student ID to delete.");
+            return;
+        }
+
+        if (studentDatabase.delete(id)) {
+            alert(`Student ID ${id} deleted successfully.`);
+        } else {
+            alert(`Error: Student ID ${id} not found.`);
+        }
+        renderStudents();
+    }
+
+    function addGrade() {
+        const id = document.getElementById('gID').value.trim();
+        const testName = document.getElementById('gTest').value.trim();
+        const score = document.getElementById('gScore').value;
+
+        if (!id || !testName || score === '') {
+            alert("Please fill in all grade fields.");
+            return;
+        }
+
+        const student = studentDatabase.get(id);
+        if (!student) {
+            alert(`Error: Student ID ${id} not found.`);
             return;
         }
 
         student.addGrade(testName, score);
-        System.out.println("✅ Grade (" + testName + ": " + score + ") added for " + student.getName() + ".");
-        System.out.println("New Average Grade: " + String.format("%.2f", student.calculateAverage()));
+        alert(`Score added for ${student.name}.`);
+
+        document.getElementById('gID').value = '';
+        document.getElementById('gTest').value = '';
+        document.getElementById('gScore').value = '';
+        renderStudents();
     }
 
-    // 4. Delete Student (Delete)
-    public void deleteStudent() {
-        System.out.println("\n--- Delete Student ---");
-        System.out.print("Enter Student ID to delete: ");
-        String id = scanner.nextLine();
+    function renderStudents() {
+        const tbody = document.getElementById('studentTableBody');
+        tbody.innerHTML = ''; // Clear existing list
 
-        if (studentDatabase.remove(id) != null) {
-            System.out.println("✅ Student with ID " + id + " deleted successfully.");
-        } else {
-            System.out.println("❌ Error: Student not found with ID " + id);
-        }
+        studentDatabase.forEach(student => {
+            const avg = student.calculateAverage().toFixed(2);
+            const letter = student.getLetterGrade();
+            const row = tbody.insertRow();
+            
+            // Apply a class for F grades for styling
+            const gradeClass = (letter === 'F') ? 'grade-f' : (letter === 'A' ? 'grade-a' : '');
+
+            row.insertCell().textContent = student.studentID;
+            row.insertCell().textContent = student.name;
+            row.insertCell().textContent = student.age;
+            row.insertCell().textContent = avg;
+            
+            const gradeCell = row.insertCell();
+            gradeCell.textContent = letter;
+            gradeCell.className = gradeClass;
+            
+            row.insertCell().textContent = student.getGradeDetails();
+        });
     }
 
-    // --- Main Menu and Execution ---
+    // Initialize with sample data on load
+    function initializeData() {
+        const s1 = new Student("Alice Johnson", 20, "S1001");
+        s1.addGrade("Midterm", 85.5);
+        s1.addGrade("Final", 92.0);
+        studentDatabase.set(s1.studentID, s1);
 
-    public void run() {
-        int choice;
-        do {
-            System.out.println("\n=========================================");
-            System.out.println("  📚 Student Management & Grading System 📝");
-            System.out.println("=========================================");
-            System.out.println("1. Add New Student (C)");
-            System.out.println("2. View All Students & Grades (R)");
-            System.out.println("3. Update/Add Student Grades (U)");
-            System.out.println("4. Delete Student (D)");
-            System.out.println("5. Exit");
-            System.out.print("Enter your choice: ");
-
-            try {
-                // Use nextLine and parse for safer input handling
-                String input = scanner.nextLine();
-                if (input.isEmpty()) continue;
-                choice = Integer.parseInt(input);
-
-                switch (choice) {
-                    case 1: addStudent(); break;
-                    case 2: viewAllStudents(); break;
-                    case 3: updateStudentGrades(); break;
-                    case 4: deleteStudent(); break;
-                    case 5: System.out.println("Exiting System. Goodbye! 👋"); break;
-                    default: System.out.println("Invalid choice. Please enter a number between 1 and 5.");
-                }
-            } catch (NumberFormatException e) {
-                System.out.println("❌ Invalid input. Please enter a number.");
-                choice = 0; // Keep loop running
-            }
-        } while (choice != 5);
-        scanner.close();
+        const s2 = new Student("Bob Smith", 21, "S1002");
+        s2.addGrade("Quiz", 65.0);
+        s2.addGrade("Project", 70.0);
+        studentDatabase.set(s2.studentID, s2);
+        
+        renderStudents();
     }
 
-    // Main method to run the program
-    public static void main(String[] args) {
-        new StudentManagementSystem().run();
-    }
-}
+    // Run initialization when the script loads
+    initializeData();
+
+</script>
+
+</body>
+</html>
