@@ -1,329 +1,395 @@
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
-import java.util.stream.Collectors;
+import java.util.InputMismatchException;
 
 /**
- * Represents a single test or assignment grade.
- * Equivalent to the JavaScript 'Grade' class.
- */
-class Grade {
-    private String testName;
-    private double score;
-
-    public Grade(String testName, double score) {
-        this.testName = testName;
-        this.score = score;
-    }
-
-    public String getTestName() {
-        return testName;
-    }
-
-    public double getScore() {
-        return score;
-    }
-
-    // Mirrors the JavaScript getGradeDetails part
-    @Override
-    public String toString() {
-        return testName + ": " + String.format("%.1f", score);
-    }
-}
-
-/**
- * Represents a student with personal details and a list of grades.
- * Equivalent to the JavaScript 'Student' class.
+ * The Student class represents a single student in the system,
+ * containing personal details and academic grades. It handles the
+ * core grading logic (average calculation and letter assignment).
+ * This demonstrates the concept of encapsulation.
  */
 class Student {
+    // Attributes
+    private int id;
     private String name;
     private int age;
-    private String studentID;
-    private List<Grade> grades;
+    // Aggregation: A Student aggregates a list of grades (scores)
+    private List<Double> grades; 
 
-    public Student(String name, int age, String id) {
+    // Constructor
+    public Student(int id, String name, int age, List<Double> grades) {
+        this.id = id;
         this.name = name;
         this.age = age;
-        this.studentID = id;
-        this.grades = new ArrayList<>();
+        this.grades = grades;
     }
 
-    // Getters and Setters for CRUD updates
+    // Getters
+    public int getId() {
+        return id;
+    }
+
     public String getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public int getAge() {
         return age;
     }
 
+    public List<Double> getGrades() {
+        return grades;
+    }
+
+    // Setters (for update functionality)
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public void setAge(int age) {
         this.age = age;
     }
 
-    public String getStudentID() {
-        return studentID;
+    public void setGrades(List<Double> grades) {
+        this.grades = grades;
     }
 
-    public void addGrade(String testName, double score) {
-        this.grades.add(new Grade(testName, score));
+    /**
+     * Calculates the average of all grades stored for the student.
+     * @return The average score as a double, or 0.0 if no grades exist.
+     */
+    public double calculateAverageGrade() {
+        if (grades.isEmpty()) {
+            return 0.0;
+        }
+        double sum = 0;
+        for (double grade : grades) {
+            sum += grade;
+        }
+        return sum / grades.size();
     }
 
-    // Equivalent to JavaScript's calculateAverage()
-    public double calculateAverage() {
-        if (this.grades.isEmpty()) return 0.0;
-        double sum = this.grades.stream().mapToDouble(Grade::getScore).sum();
-        return sum / this.grades.size();
-    }
-
-    // Equivalent to JavaScript's getLetterGrade()
-    public String getLetterGrade() {
-        double avg = calculateAverage();
-        if (avg >= 90) return "A";
-        if (avg >= 80) return "B";
-        if (avg >= 70) return "C";
-        if (avg >= 60) return "D";
+    /**
+     * Assigns a letter grade based on the calculated average score.
+     * This is a simple description of the grading criteria.
+     * A: 90-100, B: 80-89, C: 70-79, D: 60-69, F: <60.
+     * @return The letter grade (A, B, C, D, or F).
+     */
+    public String assignLetterGrade() {
+        double average = calculateAverageGrade();
+        if (average >= 90) return "A";
+        if (average >= 80) return "B";
+        if (average >= 70) return "C";
+        if (average >= 60) return "D";
         return "F";
     }
 
-    // Equivalent to JavaScript's getGradeDetails()
-    public String getGradeDetails() {
-        return this.grades.stream()
-            .map(Grade::toString)
-            .collect(Collectors.joining(" | "));
-    }
-
-    // For display in the console
-    public void printDetails() {
-        System.out.printf("| %-8s | %-15s | %-4d | %-8.2f | %-12s | %s\n",
-                studentID, name, age, calculateAverage(), getLetterGrade(), getGradeDetails());
+    /**
+     * Provides a detailed string representation of the Student object.
+     * @return Formatted student details including calculated grade.
+     */
+    @Override
+    public String toString() {
+        double average = calculateAverageGrade();
+        String letterGrade = assignLetterGrade();
+        
+        return String.format(
+            "| ID: %-5d | Name: %-20s | Age: %-4d | Grades: %-25s | Avg Score: %.2f | Letter Grade: %-2s |",
+            id, name, age, grades.toString(), average, letterGrade
+        );
     }
 }
 
 /**
- * Main application class, managing the database and user interactions.
- * Equivalent to the main script logic in the HTML file.
+ * The StudentManagementSystem class acts as the "backend" logic,
+ * managing the collection of students and providing the CRUD operations.
+ * It also handles the "front-end" console interface and authentication.
+ * This class demonstrates aggregation by containing an ArrayList of Student objects.
  */
 public class StudentManagementSystem {
+    
+    // Aggregation: The system holds a collection of Student objects
+    private List<Student> studentList;
+    private Scanner scanner;
+    
+    // Simple hardcoded user credentials for the "front-end" login
+    private static final String ADMIN_USERNAME = "admin";
+    private static final String ADMIN_PASSWORD = "password123";
 
-    // Equivalent to const VALID_USERNAME & VALID_PASSWORD
-    private static final String VALID_USERNAME = "admin";
-    private static final String VALID_PASSWORD = "1234";
+    // Counter to ensure unique IDs
+    private int nextStudentId = 1001; 
 
-    // Equivalent to const studentDatabase = new Map();
-    private static final Map<String, Student> studentDatabase = new HashMap<>();
-    private static final Scanner scanner = new Scanner(System.in);
-
-    public static void main(String[] args) {
-        System.out.println("=================================================");
-        System.out.println("  Secured Student Management & Grading System (Java Console)");
-        System.out.println("=================================================");
-
-        if (handleLogin()) {
-            initializeData();
-            mainMenu();
-        } else {
-            System.out.println("Application closed.");
-        }
+    public StudentManagementSystem() {
+        this.studentList = new ArrayList<>();
+        this.scanner = new Scanner(System.in);
+        // Add some initial data for testing
+        addSampleStudents();
     }
 
-    // ------------------------------------
-    // LOGIN/LOGOUT LOGIC (Console Simulation)
-    // ------------------------------------
+    /**
+     * Adds initial sample students to demonstrate the system functionality.
+     */
+    private void addSampleStudents() {
+        studentList.add(new Student(nextStudentId++, "Alice Smith", 19, List.of(95.0, 88.0, 92.0)));
+        studentList.add(new Student(nextStudentId++, "Bob Johnson", 20, List.of(75.0, 68.0, 81.0)));
+        studentList.add(new Student(nextStudentId++, "Charlie Brown", 18, List.of(55.0, 62.0, 40.0)));
+        System.out.println("System initialized with " + studentList.size() + " sample students.");
+    }
+    
+    /**
+     * Handles the authentication check.
+     * @return true if credentials are valid, false otherwise.
+     */
+    private boolean authenticate() {
+        System.out.println("\n--- SYSTEM LOGIN ---");
+        System.out.print("Username: ");
+        String username = scanner.nextLine();
+        System.out.print("Password: ");
+        String password = scanner.nextLine(); // Note: In a real app, this should hide input
 
-    private static boolean handleLogin() {
-        System.out.println("\n--- Student System Login 🔒 ---");
-        System.out.print("Username (Hint: admin): ");
-        String username = scanner.nextLine().trim();
-        System.out.print("Password (Hint: 1234): ");
-        String password = scanner.nextLine().trim();
-
-        if (username.equals(VALID_USERNAME) && password.equals(VALID_PASSWORD)) {
-            System.out.println("Login successful! Welcome to the system.");
+        if (ADMIN_USERNAME.equals(username) && ADMIN_PASSWORD.equals(password)) {
+            System.out.println("Login successful! Welcome, " + username + ".");
             return true;
         } else {
-            System.out.println("Invalid username or password. Login failed.");
+            System.out.println("Login failed. Invalid credentials.");
             return false;
         }
     }
 
-    private static void handleLogout() {
-        System.out.println("\nSuccessfully logged out.");
-        // In a console app, logging out typically means exiting or returning to a login loop
-        // Here, we'll exit the application
-        System.exit(0);
+    // --- CRUD Operations ---
+
+    /**
+     * Prompts the user for student details and adds a new Student object to the list.
+     */
+    public void addStudent() {
+        try {
+            System.out.println("\n--- ADD NEW STUDENT ---");
+            System.out.print("Enter student name: ");
+            String name = scanner.nextLine();
+
+            System.out.print("Enter student age: ");
+            int age = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
+
+            System.out.print("Enter grades (e.g., 85.0, 92.5, 78): ");
+            String gradesInput = scanner.nextLine();
+            List<Double> grades = parseGrades(gradesInput);
+
+            Student newStudent = new Student(nextStudentId, name, age, grades);
+            studentList.add(newStudent);
+            System.out.println("\nSUCCESS: Student added with ID: " + nextStudentId);
+            nextStudentId++;
+        } catch (InputMismatchException e) {
+            System.err.println("\nERROR: Invalid input format. Please ensure age is a number.");
+            scanner.nextLine(); // Clear the buffer
+        } catch (Exception e) {
+            System.err.println("\nAn unexpected error occurred: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Displays all students, their average scores, and letter grades.
+     */
+    public void viewAllStudents() {
+        if (studentList.isEmpty()) {
+            System.out.println("\nNo students registered in the system.");
+            return;
+        }
+
+        System.out.println("\n--- ALL REGISTERED STUDENTS & GRADES ---");
+        System.out.println("---------------------------------------------------------------------------------------------------------------------------------");
+        for (Student student : studentList) {
+            System.out.println(student); // Calls Student.toString()
+        }
+        System.out.println("---------------------------------------------------------------------------------------------------------------------------------");
     }
 
-    // ------------------------------------
-    // CORE APPLICATION LOGIC (CRUD)
-    // ------------------------------------
+    /**
+     * Finds a student by ID and allows the user to update their details or grades.
+     */
+    public void updateStudent() {
+        try {
+            System.out.println("\n--- UPDATE STUDENT ---");
+            System.out.print("Enter student ID to update: ");
+            int id = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
 
-    private static void mainMenu() {
-        boolean running = true;
-        while (running) {
-            System.out.println("\n--- Main Menu ---");
-            System.out.println("1. Add/Update Student");
-            System.out.println("2. Delete Student");
-            System.out.println("3. Add Test Score");
-            System.out.println("4. View All Students (List)");
-            System.out.println("5. Logout/Exit");
-            System.out.print("Choose an option: ");
+            Student studentToUpdate = findStudentById(id);
+            
+            if (studentToUpdate == null) {
+                System.out.println("ERROR: Student with ID " + id + " not found.");
+                return;
+            }
 
+            System.out.println("Found Student: " + studentToUpdate.getName());
+            System.out.println("Which field to update? (1: Name, 2: Age, 3: Grades, 0: Cancel)");
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+
+            switch (choice) {
+                case 1:
+                    System.out.print("Enter new name: ");
+                    studentToUpdate.setName(scanner.nextLine());
+                    System.out.println("SUCCESS: Name updated.");
+                    break;
+                case 2:
+                    System.out.print("Enter new age: ");
+                    studentToUpdate.setAge(scanner.nextInt());
+                    scanner.nextLine();
+                    System.out.println("SUCCESS: Age updated.");
+                    break;
+                case 3:
+                    System.out.print("Enter new grades (e.g., 85.0, 92.5, 78): ");
+                    String gradesInput = scanner.nextLine();
+                    studentToUpdate.setGrades(parseGrades(gradesInput));
+                    System.out.println("SUCCESS: Grades updated.");
+                    break;
+                case 0:
+                    System.out.println("Update cancelled.");
+                    break;
+                default:
+                    System.out.println("Invalid choice.");
+            }
+        } catch (InputMismatchException e) {
+            System.err.println("\nERROR: Invalid input format. ID and Age must be numbers.");
+            scanner.nextLine(); // Clear the buffer
+        } catch (Exception e) {
+            System.err.println("\nAn unexpected error occurred during update: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Finds a student by ID and removes them from the list.
+     */
+    public void deleteStudent() {
+        try {
+            System.out.println("\n--- DELETE STUDENT ---");
+            System.out.print("Enter student ID to delete: ");
+            int id = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
+
+            Student studentToDelete = findStudentById(id);
+            
+            if (studentToDelete == null) {
+                System.out.println("ERROR: Student with ID " + id + " not found.");
+                return;
+            }
+
+            System.out.print("Are you sure you want to delete " + studentToDelete.getName() + " (Y/N)? ");
+            String confirmation = scanner.nextLine().toUpperCase();
+            
+            if (confirmation.equals("Y")) {
+                studentList.remove(studentToDelete);
+                System.out.println("SUCCESS: Student " + studentToDelete.getName() + " deleted.");
+            } else {
+                System.out.println("Deletion cancelled.");
+            }
+
+        } catch (InputMismatchException e) {
+            System.err.println("\nERROR: Invalid input format. ID must be a number.");
+            scanner.nextLine(); // Clear the buffer
+        }
+    }
+
+    // --- Helper Methods ---
+    
+    /**
+     * Searches the list for a student by ID.
+     * @param id The ID to search for.
+     * @return The Student object or null if not found.
+     */
+    private Student findStudentById(int id) {
+        for (Student student : studentList) {
+            if (student.getId() == id) {
+                return student;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Parses a comma-separated string of grades into a List of Doubles.
+     * @param gradesInput The string input (e.g., "80, 90.5, 75").
+     * @return A list of Double grades.
+     */
+    private List<Double> parseGrades(String gradesInput) {
+        List<Double> grades = new ArrayList<>();
+        // Split by comma, trim whitespace, and parse to Double
+        String[] scores = gradesInput.split(",");
+        for (String score : scores) {
             try {
-                int choice = Integer.parseInt(scanner.nextLine().trim());
+                grades.add(Double.parseDouble(score.trim()));
+            } catch (NumberFormatException e) {
+                System.err.println("Warning: Skipping invalid grade input: " + score);
+            }
+        }
+        return grades;
+    }
+
+
+    /**
+     * Main application loop and menu display.
+     */
+    public void run() {
+        boolean loggedIn = authenticate();
+
+        if (!loggedIn) {
+            return; // Exit if authentication fails
+        }
+
+        int choice = -1;
+        while (choice != 0) {
+            displayMenu();
+            try {
+                System.out.print("Enter your choice: ");
+                choice = scanner.nextInt();
+                scanner.nextLine(); // Consume newline
+
                 switch (choice) {
                     case 1:
-                        addOrUpdateStudent();
+                        addStudent();
                         break;
                     case 2:
-                        deleteStudent();
+                        updateStudent();
                         break;
                     case 3:
-                        addGrade();
+                        deleteStudent();
                         break;
                     case 4:
-                        renderStudents();
+                        viewAllStudents();
                         break;
-                    case 5:
-                        running = false;
-                        handleLogout();
+                    case 0:
+                        System.out.println("\nExiting Student Management System. Goodbye!");
                         break;
                     default:
                         System.out.println("Invalid choice. Please try again.");
                 }
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a number.");
+            } catch (InputMismatchException e) {
+                System.err.println("\nInvalid input. Please enter a number for your choice.");
+                scanner.nextLine(); // Clear the buffer
+                choice = -1; // Reset choice to keep loop running
             }
         }
     }
 
-    // Equivalent to JavaScript's addStudent()
-    private static void addOrUpdateStudent() {
-        System.out.println("\n--- Add/Update Student ---");
-        System.out.print("ID (for lookup/update): ");
-        String id = scanner.nextLine().trim();
-        System.out.print("Name: ");
-        String name = scanner.nextLine().trim();
-        System.out.print("Age: ");
-        int age;
-        try {
-            age = Integer.parseInt(scanner.nextLine().trim());
-        } catch (NumberFormatException e) {
-            System.out.println("Invalid age. Operation cancelled.");
-            return;
-        }
-
-        if (id.isEmpty() || name.isEmpty() || age <= 0) {
-            System.out.println("Please fill in all student fields correctly.");
-            return;
-        }
-
-        if (studentDatabase.containsKey(id)) {
-            Student student = studentDatabase.get(id);
-            student.setName(name);
-            student.setAge(age);
-            System.out.printf("Student ID %s updated successfully.\n", id);
-        } else {
-            Student newStudent = new Student(name, age, id);
-            studentDatabase.put(id, newStudent);
-            System.out.printf("Student %s added successfully.\n", name);
-        }
-        renderStudents();
+    private void displayMenu() {
+        System.out.println("\n=======================================================");
+        System.out.println("  STUDENT MANAGEMENT & GRADING SYSTEM (Console Menu) ");
+        System.out.println("=======================================================");
+        System.out.println("1. Add New Student");
+        System.out.println("2. Update Student Details");
+        System.out.println("3. Delete Student");
+        System.out.println("4. View All Students (with Grades)");
+        System.out.println("0. Exit System");
+        System.out.println("-------------------------------------------------------");
     }
 
-    // Equivalent to JavaScript's deleteStudent()
-    private static void deleteStudent() {
-        System.out.println("\n--- Delete Student ---");
-        System.out.print("Enter Student ID to delete: ");
-        String id = scanner.nextLine().trim();
-
-        if (id.isEmpty()) {
-            System.out.println("Please enter the Student ID to delete.");
-            return;
-        }
-
-        if (studentDatabase.remove(id) != null) {
-            System.out.printf("Student ID %s deleted successfully.\n", id);
-        } else {
-            System.out.printf("Error: Student ID %s not found.\n", id);
-        }
-        renderStudents();
-    }
-
-    // Equivalent to JavaScript's addGrade()
-    private static void addGrade() {
-        System.out.println("\n--- Add Test Score ---");
-        System.out.print("Student ID: ");
-        String id = scanner.nextLine().trim();
-        System.out.print("Test Name (e.g., Midterm, Project): ");
-        String testName = scanner.nextLine().trim();
-        System.out.print("Score (0-100): ");
-        double score;
-        try {
-            score = Double.parseDouble(scanner.nextLine().trim());
-        } catch (NumberFormatException e) {
-            System.out.println("Invalid score. Operation cancelled.");
-            return;
-        }
-
-        if (id.isEmpty() || testName.isEmpty() || score < 0 || score > 100) {
-            System.out.println("Please fill in all grade fields correctly (Score 0-100).");
-            return;
-        }
-
-        Student student = studentDatabase.get(id);
-        if (student == null) {
-            System.out.printf("Error: Student ID %s not found.\n", id);
-            return;
-        }
-
-        student.addGrade(testName, score);
-        System.out.printf("Score added for %s.\n", student.getName());
-        renderStudents();
-    }
-
-    // Equivalent to JavaScript's renderStudents()
-    private static void renderStudents() {
-        System.out.println("\n--- Student List 📊 ---");
-        if (studentDatabase.isEmpty()) {
-            System.out.println("No students in the system.");
-            return;
-        }
-
-        // Print header
-        System.out.println("------------------------------------------------------------------------------------------------------------------");
-        System.out.printf("| %-8s | %-15s | %-4s | %-8s | %-12s | %s\n", "ID", "Name", "Age", "Average", "Letter Grade", "Grades");
-        System.out.println("------------------------------------------------------------------------------------------------------------------");
-
-        // Print each student's details
-        for (Student student : studentDatabase.values()) {
-            student.printDetails();
-        }
-
-        System.out.println("------------------------------------------------------------------------------------------------------------------");
-    }
-
-    // Equivalent to JavaScript's initializeData()
-    private static void initializeData() {
-        // Clear previous data if any, then add samples
-        studentDatabase.clear();
-
-        Student s1 = new Student("Alice Johnson", 20, "S1001");
-        s1.addGrade("Midterm", 85.5);
-        s1.addGrade("Final", 92.0);
-        studentDatabase.put(s1.getStudentID(), s1);
-
-        Student s2 = new Student("Bob Smith", 21, "S1002");
-        s2.addGrade("Quiz", 65.0);
-        s2.addGrade("Project", 70.0);
-        studentDatabase.put(s2.getStudentID(), s2);
-
-        // renderStudents is called in the main menu after initialization
+    /**
+     * Main entry point for the program.
+     */
+    public static void main(String[] args) {
+        StudentManagementSystem system = new StudentManagementSystem();
+        system.run();
     }
 }
